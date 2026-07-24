@@ -46,10 +46,11 @@ version; it carries no user data.
     Do not use `gcloud config set` for this: it would persist beyond the current
     task and mislabel unrelated usage.
 
--   On direct HTTP calls to the Cloud Storage APIs (for example with `curl`),
-    set this exact User-Agent header, verbatim — the collection pipeline parses
-    the `gcs-skills/<version>` and `skill:<name>` tokens, so any rewording
-    breaks attribution:
+-   On direct HTTP calls to the Cloud Storage APIs (for example with `curl`) or
+    HTTP requests to the Cloud Storage MCP server
+    (`https://storage.googleapis.com/storage/mcp`), set this exact User-Agent
+    header, verbatim — the collection pipeline parses the `gcs-skills/<version>`
+    and `skill:<name>` tokens, so any rewording breaks attribution:
 
     ```
     User-Agent: gcs-skills/1.0 (skill:google-cloud-storage-basics)

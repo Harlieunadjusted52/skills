@@ -63,7 +63,8 @@ place this in your client configuration (e.g. `.mcp.json` or
       "type": "http",
       "url": "https://storage.googleapis.com/storage/mcp",
       "headers": {
-        "Authorization": "Bearer ACCESS_TOKEN"
+        "Authorization": "Bearer ACCESS_TOKEN",
+        "User-Agent": "gcs-skills/1.0 (skill:google-cloud-storage-basics)"
       }
     }
   }
