@@ -5,7 +5,7 @@ resource "google_monitoring_alert_policy" "draft_policy" {
   conditions {
     display_name = "Draft Condition"
     condition_prometheus_query_language {
-      query = "sum(rate(aiplatform_googleapis_com:reasoning_engine_request_count[5y])) / sum(rate(aiplatform_googleapis_com:reasoning_engine_request_count[5m]"
+      query = "sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count[5y])) / sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count[5m]"
     }
   }
 }

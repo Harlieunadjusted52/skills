@@ -7,9 +7,9 @@ resource "google_monitoring_alert_policy" "agent_error_rate_fast_burn" {
     condition_prometheus_query_language {
       query    = <<-EOT
         (
-          sum(rate(aiplatform_googleapis_com:reasoning_engine_request_count{response_code!~"2..", reasoning_engine_id="12345"}[5m]))
+          sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count{error_type!="", gen_ai_agent_name="my-agent"}[5m]))
           /
-          sum(rate(aiplatform_googleapis_com:reasoning_engine_request_count{reasoning_engine_id="12345"}[5m]))
+          sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count{gen_ai_agent_name="my-agent"}[5m]))
           > (1 - var.slo_target) * 3
         )
       EOT
