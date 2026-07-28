@@ -124,6 +124,8 @@ QUALIFY
     AND
   status_code = 7
     AND
+  principal_email LIKE '%gcp-sa-aiplatform-re.iam.gserviceaccount.com'
+    AND
   permission_denied_rate_percentage >= 25
 ORDER BY
   permission_denied_rate_percentage DESC
