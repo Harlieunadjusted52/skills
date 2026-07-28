@@ -412,7 +412,7 @@ Implement the alert policy resource using a `condition_sql` block with a
 ```terraform
 resource "google_monitoring_alert_policy" "model_call_error_rate" {
   project      = var.project_id
-  display_name = "${var.project_name} Agent Model Call Error Rate Alert"
+  display_name = "Agent Reliability - High Model Call Error Rate"
   combiner     = "OR"
 
   conditions {
@@ -486,7 +486,7 @@ Implement the alert policy resource using a `condition_sql` block with a
 ```terraform
 resource "google_monitoring_alert_policy" "tool_call_error_rate" {
   project      = var.project_id
-  display_name = "${var.project_name} Agent Tool Call Error Rate Alert"
+  display_name = "Agent Reliability - High Tool Call Error Rate"
   combiner     = "OR"
 
   conditions {
