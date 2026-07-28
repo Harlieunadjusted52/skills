@@ -131,6 +131,16 @@ repo to install.
 -   [**Agent Development Kit (ADK) Skills**](https://github.com/google/agents-cli)
 -   [**Firestore Skills**](https://github.com/firebase/agent-skills/tree/main/skills/firebase-firestore)
 
+## Plugins
+
+This repo also bundles Google product plugins (Skills + MCP servers) for agent harnesses.
+
+| Agent harness | Install |
+| :--- | :--- |
+| **Claude Code** | `claude plugin marketplace add google/skills`, then `claude plugin install <plugin>@google-plugins` |
+| **Codex** | `codex plugin marketplace add google/skills`, then install from the `/plugins` browser |
+| **Antigravity CLI** | `agy plugin install https://github.com/google/skills/<plugin-path>` |
+
 ## Support
 
 If you need help or encounter issues with these skills, search for existing
