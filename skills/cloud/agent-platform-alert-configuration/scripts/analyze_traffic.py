@@ -307,6 +307,7 @@ def main():
   )
   parser.add_argument(
       "--metric-type",
+      required=True,
       type=str,
       help="The metric type to query.",
   )

@@ -189,7 +189,7 @@ presenting or applying Terraform changes:
 1.  **Duplicate Check & Merge**: Checks for pre-existing alerts in the target
     folder to ensure changes are merged in-place rather than appended:
     *   Command: `python3 scripts/validate_config.py --directory {target_tf_dir}
-        --engine-var "${var.gen_ai_agent_name}"`
+        --engine-var '${var.gen_ai_agent_name}'`
 2.  **Config Linting**: Validates PromQL grammar, matching engine labels, and
     HCL structure:
     *   Command: `python3 scripts/validate_config.py --file {path_to_tf_file}`
