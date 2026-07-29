@@ -81,6 +81,7 @@ repo to install.
   - [**Borderless open data lakehouse agentic AI system**](./skills/cloud/google-cloud-solution-agentic-ai-borderless-data-lakehouse)
   - [**Cloud SQL Basics**](./skills/cloud/cloud-sql-basics)
   - [**Data Lineage Summary**](./skills/cloud/datalineage-summary)
+  - [**Spanner Basics**](./skills/cloud/spanner-basics)
 - **Developer tools**
   - [**gcloud CLI Skill for AI Agents**](./skills/cloud/gcloud)
   - [**Google Agents CLI Onboarding**](./skills/cloud/google-agents-cli-onboarding)
