@@ -85,6 +85,7 @@ repo to install.
   - [**Google Agents CLI Onboarding**](./skills/cloud/google-agents-cli-onboarding)
 - **Management tools**
   - [**Configuring Cloud Logging**](./skills/cloud/cloud-logging-configuration-basics)
+  - [**Configuring Cross-Project Logging**](./skills/cloud/cloud-logging-cross-project-configuration)
   - [**Generate Logging Query Language queries**](./skills/cloud/cloud-logging-query-generation)
   - [**GKE Cost Analysis**](./skills/cloud/gke-cost-analysis)
   - [**GKE Cost Optimization**](./skills/cloud/gke-cost-optimization)
