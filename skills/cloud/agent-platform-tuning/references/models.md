@@ -41,6 +41,10 @@ size.
 
 | Model | Tuning Mode | Learning Rate | Epochs | Adapter Size (PEFT) |
 | :--- | :--- | :--- | :--- | :--- |
+| Gemma 4 E2B IT | PEFT | 2.0E-4 | 3 | 16 |
+| Gemma 4 E4B IT | PEFT | 2.0E-4 | 3 | 16 |
+| Gemma 4 26B A4B IT | PEFT | 2.0E-4 | 3 | 16 |
+| Gemma 4 31B IT | PEFT | 2.0E-4 | 3 | 16 |
 | Gemma 3 1B IT | Full | 2.0E-5 | 3 | N/A |
 | Gemma 3 4B IT | Full | 1.0E-5 | 3 | N/A |
 | Gemma 3 12B IT | Full | 1.0E-5 | 3 | N/A |

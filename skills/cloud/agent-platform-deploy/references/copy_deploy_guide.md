@@ -33,9 +33,10 @@ If user is copying model in different region, skip the P4SA setup section.
     (`us-central1`) with the user. You MUST halt execution and wait for the
     user's explicit confirmation response before running any `gcloud` or `curl`
     commands. If you are generating a script for the user instead of running
-    commands live, you MUST explicitly include a note in your response explaining
-    that confirming the development environment (e.g., prod) and destination
-    context with the user is required before running the script live.
+    commands live, you MUST explicitly include a note in your response
+    explaining that confirming the development environment (e.g., prod) and
+    destination context with the user is required before running the script
+    live.
 -   Execute the following command to set the global variable.
     `export ENV="prod"`
 
@@ -101,8 +102,8 @@ assign the Vertex AI Service Agent role to it.
 
 -   If failed, try to add user's account to destination project.
     ```bash
-    gcloud projects add-iam-policy-binding gemini-billing-prober-018 \
-    --member="user:${USER}@google.com" --role="roles/aiplatform.admin"
+    gcloud projects add-iam-policy-binding ${DEST_PROJECT_ID} \
+    --member="user:${USER_EMAIL}" --role="roles/aiplatform.admin"
     ```
 
 -   If failed again, prompt user to do it.
