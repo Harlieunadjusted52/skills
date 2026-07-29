@@ -35,6 +35,7 @@ repo to install.
   - [**Agent Platform Model Tuning**](./skills/cloud/agent-platform-tuning)
   - [**Agent Platform Prompt Management**](./skills/cloud/agent-platform-prompt-management)
   - [**Agent Platform RAG Engine Management**](./skills/cloud/agent-platform-rag-engine-management)
+  - [**Agent Platform Troubleshooting**](./skills/cloud/agent-platform-troubleshooting)
   - [**Agent Platform Tuning Management**](./skills/cloud/agent-platform-tuning-management)
   - [**BigQuery AI & ML**](./skills/cloud/bigquery-ai-ml)
   - [**Build and deploy AI agents on Google Cloud**](./skills/cloud/google-cloud-solution-build-deploy-agents)
