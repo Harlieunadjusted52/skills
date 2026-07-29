@@ -92,6 +92,7 @@ repo to install.
   - [**GKE Cost Analysis**](./skills/cloud/gke-cost-analysis)
   - [**GKE Cost Optimization**](./skills/cloud/gke-cost-optimization)
   - [**GKE Observability**](./skills/cloud/gke-observability)
+  - [**GKE TPU Metrics Monitoring Guide**](./skills/cloud/gke-tpu-metrics-monitoring)
   - [**Handle Disruption on GPUs and TPUs Troubleshooting**](./skills/cloud/gke-ai-troubleshooting-handle-disruption-gpu-tpu)
   - [**Metric Selection (Service Query & Local Keyword Filtering)**](./skills/cloud/cloud-monitoring-metric-selection)
   - [**Workload Manager Basics**](./skills/cloud/workload-manager-basics)
