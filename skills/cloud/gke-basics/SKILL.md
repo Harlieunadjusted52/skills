@@ -50,6 +50,9 @@ requirements. **Do not load multiple GKE skills unless explicitly required.**
 | GPU/TPU Disruption   | GPU termination, TPU    | `gke-ai-troubleshooting-`   |
 :                      : shutdown, host          : `handle-disruption-gpu-tpu` :
 :                      : maintenance             :                             :
+| JobSet Interruption  | JobSet restart, spot    | `gke-ai-troubleshooting-`   |
+:                      : preemption, host error, : `jobset-interruption`       :
+:                      : worker crash            :                             :
 | Cluster Upgrades     | upgrade, maintenance    | `gke-upgrades`              |
 :                      : window, release channel :                             :
 | Observability        | monitoring, logging,    | `gke-observability`         |

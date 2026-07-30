@@ -58,6 +58,7 @@ repo to install.
   - [**GKE Cluster Creation**](./skills/cloud/gke-cluster-creation)
   - [**GKE ComputeClasses**](./skills/cloud/gke-compute-classes)
   - [**GKE Golden Path Configuration**](./skills/cloud/gke-golden-path)
+  - [**GKE JobSet Interruption Troubleshooting**](./skills/cloud/gke-ai-troubleshooting-jobset-interruption)
   - [**GKE Manifest Generation Skill**](./skills/cloud/gke-manifest-generation)
   - [**GKE Multi-Tenancy**](./skills/cloud/gke-multitenancy)
   - [**GKE Networking**](./skills/cloud/gke-networking)
