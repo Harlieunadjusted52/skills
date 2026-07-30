@@ -78,6 +78,11 @@ requirements. **Do not load multiple GKE skills unless explicitly required.**
 :                      : productionize,          :                             :
 :                      : readiness scoring,      :                             :
 :                      : audit cluster           :                             :
+| Workload             | pod crash,               | `gke-workload-`             |
+: Troubleshooting      : CrashLoopBackOff,        : `troubleshooting`           |
+:                      : OOMKilled,               :                             :
+:                      : ImagePullBackOff,        :                             :
+:                      : Pending                  :                             :
 | Manifest Generation  | generate YAML, manifest | `gke-manifest-generation`   |
 :                      : template,               :                             :
 :                      : securityContext probes, :                             :
