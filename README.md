@@ -52,7 +52,7 @@ repo to install.
   - [**GKE AI/ML Inference**](./skills/cloud/gke-inference)
   - [**GKE App Onboarding**](./skills/cloud/gke-app-onboarding)
   - [**GKE Backup & Disaster Recovery**](./skills/cloud/gke-backup-dr)
-  - [**GKE Basics**](./skills/cloud/gke-basics)
+  - [**GKE Basics & Critical Gotchas**](./skills/cloud/gke-basics)
   - [**GKE Batch & HPC Workloads**](./skills/cloud/gke-batch-hpc)
   - [**GKE Cluster Autoscaler**](./skills/cloud/gke-cluster-autoscaler)
   - [**GKE Cluster Creation**](./skills/cloud/gke-cluster-creation)
