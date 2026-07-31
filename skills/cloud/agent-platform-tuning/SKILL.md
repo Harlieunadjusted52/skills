@@ -37,8 +37,9 @@ configuration, monitoring, and deployment.
         models might be more expensive, etc.). **CRITICAL:** You must read
         `references/models.md` during this step and only recommend models
         explicitly listed in that catalog. Do not recommend unsupported models
-        like Mistral. Do not proceed with model configuration until the category
-        is confirmed.
+        like Mistral. If the user names a model that is not in the catalog,
+        follow the fallback rule in that catalog. Do not proceed with model
+        configuration until the category is confirmed.
     -   **Yes** → Proceed.
 
 2.  **Environment Check**: Has the environment (Auth, APIs, IAM, Venv) been
@@ -106,34 +107,121 @@ gcloud components update --quiet > /dev/null 2>&1
 ```
 
 -   Verify `gcloud auth list`. If not authenticated, run `gcloud auth login`.
--   Ensure `project` and `location` are known. Use `gcloud config get project`
-    to retrieve the current project (and `gcloud config get compute/region` for
-    region).
+-   Ensure `project` is known. Use `gcloud config get project` to retrieve the
+    current project.
 -   **CRITICAL: Ask for Confirmation.** You must prompt the user to confirm the
-    retrieved project and region before proceeding, in case they want to switch
-    to a different one.
+    retrieved project before proceeding, in case they want to switch to a
+    different one. The location must also be confirmed — see section 0.2 for
+    which location to propose, which depends on the model category.
 
-### 0.2 Possible Locations (STRICT ALLOWLIST)
+### 0.2 Location
 
-The following locations are the ONLY ones available for tuning:
+Location handling **depends on the model category** you established in the
+workflow decision tree. The two categories have different supported locations —
+never apply one category's locations to the other.
 
--   us-central1
--   europe-west4
--   us-west1
--   us-east5
--   asia-southeast1
+-   **Open models** share one fixed location set, and `global` is the
+    recommended choice.
+-   **Gemini models** differ per model and must be looked up. `global` is not
+    accepted for them today.
 
-**BEFORE any other setup step**, if the user has named a location, you MUST
-check it against this allowlist:
+If the user names a location that is not valid for their model and category,
+STOP. Respond with an error naming the requested location as unsupported, list
+the locations that are valid, and do NOT ask for a dataset, do NOT proceed with
+any other setup step, and do NOT silently retry elsewhere.
 
--   If the location is in the list: proceed.
--   If NOT in the list: STOP. Respond only with an error naming the requested
-    location as unsupported for tuning and list the supported locations above.
-    Do NOT ask for dataset, do NOT proceed with any other setup step, do NOT
-    propose to "try anyway" or silently retry in a supported region.
+#### Open Models (RECOMMEND: `global`)
 
-If the user has not named a location, ask for one from the allowlist before
-asking for any other input.
+**Recommend `global` and confirm it with the user.** Propose it as a single
+recommended choice rather than making the user pick a region first, and do not
+steer them toward a specific region instead.
+
+These are the only locations available for open model tuning:
+
+-   `global` (the recommended choice)
+-   `us-central1`
+-   `europe-west4`
+-   `us-west1`
+-   `us-east5`
+-   `asia-southeast1`
+
+The `global` endpoint automatically selects a supported region that has
+available capacity, so it is the most likely to be scheduled successfully.
+Pinning a region up front restricts the job to that one region's capacity, which
+is why `global` is the recommended location for open model tuning.
+
+
+-   **The user named a location** → use it verbatim, provided it is `global` or
+    one of the regions listed above. Do not talk them out of it.
+-   **The user asked which locations are supported** → answer the question.
+    Share the list above and say that `global` is recommended and why. Never
+    withhold it.
+-   **The user did not name a location** → propose `global` and ask them to
+    confirm it before you proceed. Say that `global` lets the service pick a
+    region with available capacity. Do NOT silently assume `global`.
+
+The point of proposing a single choice is to avoid making region selection a
+decision the user must resolve before anything else can happen — that ordering
+is what previously blocked people. It is not a reason to hide the list: quote it
+whenever the user asks, and quote it when rejecting an unsupported location.
+
+Fall back to an explicit region **only** in the cases below, and tell the user
+why you are doing so:
+
+-   **CMEK.** Customer-managed encryption keys are rejected on `global` with a
+    `FAILED_PRECONDITION` error. A CMEK-protected job must name the region that
+    holds the key.
+
+-   **Data residency.** If the user requires the job to stay in a specific
+    jurisdiction, honor their region. `global` currently runs the job in either
+    `us-central1` or `europe-west4`.
+
+If a `global` job is accepted but then fails with a `FAILED_PRECONDITION` error
+saying the model does not support global endpoint tuning, that model is not
+onboarded to the global endpoint yet. The model itself is still tunable:
+resubmit once in an explicit region from the list above (`us-central1` is the
+safest choice) and tell the user why you switched.
+
+##### Working with a `global` job
+
+-   The API host stays `aiplatform.googleapis.com`. There is no
+    `global-aiplatform.googleapis.com` host.
+-   The service resolves `global` to a real region at run time. Sub-resources
+    (the tuned model, checkpoints, TensorBoard) come back with that **real**
+    region in their resource names, not `global`. Read the location out of the
+    returned resource name before using it for monitoring or deployment; never
+    assume it is still `global`.
+-   Quota is shared across regions, so pinning a region does not grant extra
+    quota.
+
+#### Gemini Models (per-model, look it up)
+
+`global` is **not accepted for Gemini tuning today** — the service rejects it at
+job creation with a `FAILED_PRECONDITION` error, so do not propose it here.
+
+
+**There is no single region allowlist for Gemini.** Supported tuning regions
+vary by model and by model version: some Gemini models are restricted to two
+regions while others support many more. Do NOT reuse the open model list above,
+and do NOT assume a region carries over from another Gemini model.
+
+Before submitting, look up the chosen model in the supervised fine-tuning
+documentation and read its **"Supported endpoint for model tuning"**
+row:
+[supervised tuning](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/tuning/supervised-tuning)
+
+
+-   **The user asked which regions are supported** → look up that specific model
+    and tell them what the docs say. Do not answer from memory or from the open
+    model list, and do not answer for a different Gemini model.
+-   **The model's row names specific regions** → the user's region must be one
+    of them. If it is not, STOP and report the supported regions for that model.
+-   **The model's row is absent or the docs are unclear** → ask the user for the
+    region rather than guessing one.
+
+Confirm the region with the user before proceeding. Note that some Gemini models
+also restrict CMEK and serve tuned models only on the `us` and `eu` multi-region
+endpoints, so check the same table for those limits before promising them.
 
 ### 0.3 Enable APIs
 
@@ -154,26 +242,27 @@ Verify the following identities have the required roles.
     `service-PROJECT_NUMBER@gcp-sa-vertex-moss-ft.iam.gserviceaccount.com`
 -   **User Identity**: The account running the commands.
 
-### 0.5 Virtual Environment
+### 0.5 Python Dependencies
 
-Create and use a virtual environment named `tuning_agent_venv` in the home
-directory. Install dependencies from `references/requirements.txt`.
+The scripts in this skill import `vertexai` (from `google-cloud-aiplatform`),
+`google-genai`, `google-cloud-storage`, and `datasets`.
+
+**CRITICAL AGENT INSTRUCTION:** Do **not** create a virtual environment, and do
+not install anything before checking. A venv starts empty and hides packages the
+environment already provides, forcing a redundant several-minute install.
+
+Probe first and install only if the probe fails:
 
 ```bash
-python3 -m venv ~/tuning_agent_venv
-source ~/tuning_agent_venv/bin/activate
-pip install -r references/requirements.txt
+python3 -c "import vertexai, google.genai, google.cloud.storage, datasets" \
+  || pip install -r references/requirements.txt
 ```
 
-**CRITICAL AGENT INSTRUCTION:** You **MUST** ensure that every Python command or
-script execution (e.g., `python3 scripts/...`, `pip install ...`) is prefixed
-with the virtual environment activation command: `source
-~/tuning_agent_venv/bin/activate &&`. Additionally, advise the user that every
-single time they run a Python command, execute a script, or inspect data inline,
-they **MUST** also activate this virtual environment first in their bash
-execution. For example: `source ~/tuning_agent_venv/bin/activate && python3
-...`. Do not run standalone `python3` commands without activating the
-environment, as they will encounter `ModuleNotFoundError` issues.
+Then run every script with a plain `python3 scripts/...` — no activation prefix.
+
+The `references/requirements.txt` pins are a fallback for an environment that
+does not already provide these SDKs. Do not apply them on top of a working
+environment: they would downgrade packages other tools may share.
 
 ## Phase 1: Dataset Preparation & Upload {#phase-1}
 
@@ -247,10 +336,12 @@ for required schemas.
 ### 1.2 Upload
 
 Upload formatted `.jsonl` files to GCS using a unique directory (e.g., with a
-datetime timestamp) to avoid overwriting outputs from different
-runs. <!-- disableFinding(LINE_OVER_80) --> `bash
-ARTIFACTS="gs://YOUR_BUCKET/tuning_agent_job_<datetime>/dataset.jsonl" gcloud
-storage cp dataset.jsonl $ARTIFACTS` <!-- enableFinding(LINE_OVER_80) -->
+datetime timestamp) to avoid overwriting outputs from different runs.
+
+```bash
+ARTIFACTS="gs://YOUR_BUCKET/tuning_agent_job_<datetime>/dataset.jsonl"
+gcloud storage cp dataset.jsonl "$ARTIFACTS"
+```
 
 ## Phase 2: Model Configuration & Recommendation {#phase-2}
 
@@ -354,14 +445,14 @@ Check if `scripts/tune_gemini_model.py` exists.
 
 Submit the open model tuning job using `scripts/tune_open_model.py`. Identify
 the model id using available models documentation
-at <!-- disableFinding(LINE_OVER_80) -->
+at
 [documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/open-model-tuning#supported-models).
-<!-- enableFinding(LINE_OVER_80) -->
+
 
 ```bash
 python3 scripts/tune_open_model.py \
     --project YOUR_PROJECT \
-    --location YOUR_LOCATION \
+    --location global \
     --base_model BASE_MODEL_ID \
     --train_dataset gs://YOUR_BUCKET/tuning_agent_job_<datetime>/dataset.jsonl \
     --output_uri gs://YOUR_BUCKET/tuning_agent_job_<datetime>/output \
@@ -369,6 +460,10 @@ python3 scripts/tune_open_model.py \
     --learning_rate LR \
     --tuning_mode MODE
 ```
+
+This script is open model only, and `--location` falls back to `global` if
+omitted. Always pass the location the user confirmed in section 0.2 explicitly,
+so it is visible in the command string you present for approval.
 
 > [!IMPORTANT] **Interactive Confirmation Required (Tier M):** Before proceeding
 > with job submission, you **MUST** present the proposed command string showing
@@ -384,6 +479,10 @@ python3 scripts/tune_open_model.py \
 ## Phase 4: Monitoring {#phase-4-monitoring}
 
 Monitor the job via the Cloud Console link provided in the script output.
+`--location` is required and must be the same location you submitted with: an
+open model job submitted on `global` is polled with `--location global`, even
+though the work runs in a real region behind the scenes.
+
 Additionally, ask the user if they want you to monitor the job status for them
 in the background. If they agree, execute `scripts/monitor_tuning_job.py` as a
 background task to periodically poll the job status and notify the user to show
@@ -393,6 +492,10 @@ the status.
 ## Phase 5: Model Deployment {#phase-5-model-deployment}
 
 Once the tuning job is `SUCCEEDED`, deploy the model.
+
+Deployment requires a real region — `--region=global` is not valid here. If the
+job ran on `global`, read the region out of the tuned model's resource name
+(`projects/.../locations/<REGION>/models/...`) and deploy there; do not guess.
 
 ```bash
 ARTIFACTS="gs://YOUR_BUCKET/tuning_agent_job_<datetime>/output/postprocess/node-0/checkpoints/final"

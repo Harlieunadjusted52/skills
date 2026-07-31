@@ -37,14 +37,7 @@ following safety tiers based on the action requested:
 **CRITICAL**: Before running any of the Python snippets below, you MUST ensure
 the environment is correctly initialized by following these steps:
 
-1.  **Virtual Environment**: Create and activate a virtual environment:
-
-    ```bash
-    python3 -m venv ~/tuning_mgr_venv
-    source ~/tuning_mgr_venv/bin/activate
-    ```
-
-2.  **Google Cloud Authentication**: Authenticate with your Google Cloud account
+1.  **Google Cloud Authentication**: Authenticate with your Google Cloud account
     and configure active Application Default Credentials (ADC) for Agent
     Platform access:
 
@@ -53,14 +46,17 @@ the environment is correctly initialized by following these steps:
     gcloud auth application-default login
     ```
 
-3.  **Install Dependencies**: Install the required Agent Platform SDK:
+2.  **Python Dependencies**: This skill needs `google-cloud-aiplatform`. Do
+    **not** create a virtual environment — it starts empty and hides packages
+    the environment already provides, forcing a redundant install. Probe, and
+    install only what is missing:
 
     ```bash
-    pip install google-cloud-aiplatform
+    python3 -c "import vertexai" || pip install google-cloud-aiplatform
     ```
 
-4.  **Execution**: Advise the user that every time they execute a Python
-    snippet, they must ensure this virtual environment is activated first.
+3.  **Execution**: Run Python snippets with a plain `python3`. There is no
+    environment to activate first.
 
 ## Workflow Decision Tree
 

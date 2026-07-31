@@ -46,11 +46,12 @@ If user is copying model in different region, skip the P4SA setup section.
 -   Verify `gcloud auth list`. If not authenticated, run `gcloud auth login`.
 -   Execute the following command to set the global variable.
     `export PROJECT_ID=${PROJECT_ID} REGION=${REGION}`
--   Check if ${USER} have value, or ask user to set one.
+-   Check if ${USER_EMAIL} have value (the full account email), or ask user to
+    set one.
 
 ### 0.2 GCloud CLI setup
 
--   use `scripts/config_gcloud_cli.sh ${ENV} ${PROJECT_ID} ${REGION} ${USER}`
+-   use `scripts/config_gcloud_cli.sh ${ENV} ${PROJECT_ID} ${REGION} ${USER_EMAIL}`
 
 ### 0.3 P4SA Setup
 
@@ -58,9 +59,9 @@ If user is copying model in different region, skip the P4SA setup section.
 
 To copy a model from source project ${SOURCE_PROJECT} to the destination project
 ${PROJECT_ID}, and ${REGION}, follow
-<!-- disableFinding(LINE_OVER_80) -->
+
 https://docs.cloud.google.com/gemini-enterprise-agent-platform/machine-learning/model-registry/copy-model, add the
-<!-- enableFinding(LINE_OVER_80) -->
+
 P4SA of the destination project as a new principal to the source project and
 assign the Vertex AI Service Agent role to it.
 

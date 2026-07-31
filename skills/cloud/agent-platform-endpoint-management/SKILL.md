@@ -74,6 +74,10 @@ gcloud ai endpoints list \
     --region=$LOCATION_ID
 ```
 
+*(Optional)* For pagination, you MUST use `--limit=$LIMIT` to restrict the total
+number of returned endpoints. You can also append `--page-size=$PAGE_SIZE` to
+control API chunking, or `--page-token=$PAGE_TOKEN` for next pages.
+
 > [!IMPORTANT]
 >
 > Always specify the `--region`. Do NOT use 'global'. Ask the user to specify if

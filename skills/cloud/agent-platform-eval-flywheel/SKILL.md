@@ -53,11 +53,18 @@ to the following safety tiers based on the action requested:
 
 ## Setup
 
-Install the SDK:
+The scripts need `vertexai` (from `google-cloud-aiplatform[evaluation]`),
+`google-genai`, `pandas`, and `requests`. Do **not** create a virtual
+environment — it starts empty and hides packages the environment already
+provides, forcing a redundant install. Probe, and install only what is missing:
 
 ```bash
-pip install google-cloud-aiplatform[evaluation]>=1.154.0 google-genai>=1.0.0
+python3 -c "import vertexai, google.genai, pandas, requests" \
+  || pip install 'google-cloud-aiplatform[evaluation]>=1.154.0' 'google-genai>=1.0.0'
 ```
+
+The version specifiers must stay quoted: unquoted, bash reads `>=1.154.0` as a
+redirect and silently writes an empty file instead of constraining the install.
 
 Need `GOOGLE_CLOUD_PROJECT` and `GOOGLE_CLOUD_LOCATION`. Check env vars first;
 if missing, ask the user. Newer Gemini models often need `location="global"`.

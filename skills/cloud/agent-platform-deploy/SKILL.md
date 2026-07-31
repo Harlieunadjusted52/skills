@@ -4,14 +4,19 @@ metadata:
   category: AiAndMachineLearning
 description: >-
   Deploy open models or custom weights from Model Garden to Agent Platform
-  endpoints, check deployment status, verify serving endpoints, or clean up
-  resources by undeploying models and deleting endpoints. Use when asked to
-  deploy models on Agent Platform, list available Model Garden models, check if
-  a model is deployable, query deployment cost, troubleshoot deployment errors
-  (like quota limits), or undeploy/clean up endpoints. Also use when copying
-  and deploying a 1P Tuned Model. Don't use for public Vertex AI deployments
-  (use the `vertex-deploy` skill) or for running model evaluations (use the
-  `agent-platform-eval-flywheel` skill).
+  endpoints, check the status of an in-progress deployment operation, or clean
+  up resources by undeploying models and deleting endpoints. Use when asked to
+  actively deploy a model, list the Model Garden CATALOG of available models,
+  check if a specific model is deployable
+  (`gcloud ai model-garden models list-deployment-config`), query deployment
+  cost, troubleshoot deployment errors (like quota limits), or undeploy/clean
+  up endpoints. Also use when copying and deploying a 1P Tuned Model. Don't
+  use for pure listing/discovery questions of the form "is X deployed?",
+  "list my endpoints", or "which regions have models running?" — for those
+  use `agent-platform-endpoint-management`. Don't use for public Vertex AI
+  deployments (use the `vertex-deploy`
+  skill) or for running model evaluations (use the `agent-platform-eval-flywheel`
+  skill).
 ---
 
 # Agent Platform Model Garden Deploy Skill
@@ -187,6 +192,7 @@ Interpret the probe result and act:
     underlying cause in plain language (e.g. "your account doesn't have access
     to this project's Vertex AI API — enable it in the console or switch
     projects") and the concrete next action.
+
 
 ## 3. Deploying a Model
 

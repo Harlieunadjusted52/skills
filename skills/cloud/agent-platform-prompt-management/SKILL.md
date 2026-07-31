@@ -83,22 +83,18 @@ these steps:
     gcloud auth application-default login
     ```
 
-2.  **Virtual Environment**: Create and activate a dedicated virtual
-    environment:
+2.  **Python Dependencies**: This skill needs `google-cloud-aiplatform` and
+    `google-genai`. Do **not** create a virtual environment — it starts empty
+    and hides packages the environment already provides, forcing a redundant
+    install. Probe, and install only what is missing:
 
     ```bash
-    python3 -m venv ~/prompt_agent_venv
-    source ~/prompt_agent_venv/bin/activate
+    python3 -c "import vertexai, google.genai" \
+      || pip install google-cloud-aiplatform google-genai
     ```
 
-3.  **Install Dependencies**: Install the required Agent Platform SDKs:
-
-    ```bash
-    pip install google-cloud-aiplatform google-genai
-    ```
-
-4.  **Execution**: Advise the user that every time they execute a Python
-    snippet, they must ensure this virtual environment is activated first.
+3.  **Execution**: Run Python snippets with a plain `python3`. There is no
+    environment to activate first.
 
 > [!TIP]
 >

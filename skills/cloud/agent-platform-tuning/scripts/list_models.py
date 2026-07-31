@@ -4,8 +4,8 @@ import argparse
 import json
 import sys
 
-import vertexai  # pytype: disable=import-error
-from vertexai import model_garden  # pytype: disable=import-error
+import vertexai  # pyrefly: ignore[missing-import]
+from vertexai import model_garden  # pyrefly: ignore[missing-import]
 
 _TOP_K = 20
 

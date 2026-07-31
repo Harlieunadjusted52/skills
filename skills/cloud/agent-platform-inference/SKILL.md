@@ -71,32 +71,32 @@ environment is correctly initialized by following these steps:
     gcloud services enable aiplatform.googleapis.com
     ```
 
-3.  **Virtual Environment**: Create and activate a dedicated local virtual
-    environment:
+3.  **Python Dependencies**: The scripts import `vertexai` (from
+    `google-cloud-aiplatform`), `google-genai`, and `openai`. Do **not** create
+    a virtual environment — it starts empty and hides packages the environment
+    already provides, forcing a redundant install. Probe, and install only what
+    is missing:
 
     ```bash
-    python3 -m venv .venv
-    source .venv/bin/activate
+    python3 -c "import vertexai, google.genai, openai" \
+      || pip install -r scripts/requirements.txt
     ```
 
-4.  **Install Dependencies**: Install the required SDKs:
+    The pins in `scripts/requirements.txt` are a fallback for an environment
+    that does not already provide these SDKs; do not apply them on top of a
+    working environment.
 
-    ```bash
-    pip install -r scripts/requirements.txt
-    ```
-
-5.  **Verify Setup (Optional)**: Run all sample scripts at once to verify the
+4.  **Verify Setup (Optional)**: Run all sample scripts at once to verify the
     environment is working end-to-end:
 
     ```bash
     ./scripts/verify_all.sh
     ```
 
-6.  **Execution**: Advise the user that every time they execute a Python snippet
-    from this skill, they must ensure this virtual environment is activated
-    first.
+5.  **Execution**: Run the scripts with a plain `python3 scripts/...`. There is
+    no environment to activate first.
 
-<!-- disableFinding(LINE_OVER_80) -->
+
 
 > [!IMPORTANT] **CRITICAL: Model IDs & Availability** * **Gemini Models**: See
 > [Gemini Models][gemini-models-docs] for valid Model IDs and Regions. *
@@ -109,7 +109,7 @@ environment is correctly initialized by following these steps:
 >
 > \[gemini-models-docs]:
 > https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate
-> <!-- enableFinding(LINE_OVER_80) -->
+>
 >
 > ## Workflow Decision Tree
 
@@ -288,21 +288,21 @@ def get_gcp_access_token():
 
 > [!NOTE] Google Cloud access tokens typically expire after 1 hour. The
 > `get_gcp_access_token()` function above retrieves a *fresh* token at the time
-> it is called. <!-- disableFinding(LINE_OVER_80) --> For long-running
+> it is called. For long-running
 > applications, you implement a refresh mechanism. See
 > [Refresh the access token](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate/openai/auth-and-credentials?hl=en#refresh_your_credentials)
-> for details. <!-- enableFinding(LINE_OVER_80) -->
+> for details.
 
 ### Configuration (Base URL)
 
-<!-- disableFinding(LINE_OVER_80) -->
+
 
 -   **Global Endpoint** (Recommended for most models requiring global
     availability):
     `https://aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/global/endpoints/openapi`
 -   **Regional Endpoint**:
     `https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi`
-    <!-- enableFinding(LINE_OVER_80) -->
+
 
 ### Python Example (OpenMaaS - Chat Completions)
 
@@ -708,10 +708,10 @@ print(response.text)
     1.  **Check Location Availability**:
         *   **OpenMaaS**: Verify the model is available in your region. See
             [Model Availability by Location](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations#genai-open-models).
-        *   **Gemini**: <!-- disableFinding(LINE_OVER_80) -->
+        *   **Gemini**:
             *   **Source of Truth**: Always check
                 [Gemini Model Locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations#google-models)
-                for the authoritative list. <!-- enableFinding(LINE_OVER_80) -->
+                for the authoritative list.
             *   **Preview Models**: All Preview models (e.g., Gemini 3.1,
                 experimental versions) are often **ONLY** available in the
                 `us-central1` or `global` regions.
