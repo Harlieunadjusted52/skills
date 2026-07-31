@@ -88,6 +88,7 @@ repo to install.
   - [**gcloud CLI Skill for AI Agents**](./skills/cloud/gcloud)
   - [**Google Agents CLI Onboarding**](./skills/cloud/google-agents-cli-onboarding)
 - **Management tools**
+  - [**Cloud Monitoring Chart Generation Skill (`cloud-monitoring-chart-generation`)**](./skills/cloud/cloud-monitoring-chart-generation)
   - [**Configuring Cloud Logging**](./skills/cloud/cloud-logging-configuration-basics)
   - [**Configuring Cross-Project Logging**](./skills/cloud/cloud-logging-cross-project-configuration)
   - [**Generate Logging Query Language queries**](./skills/cloud/cloud-logging-query-generation)
