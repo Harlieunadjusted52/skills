@@ -12,34 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for HCL configuration alert policies parsing.
-
-Also tests duplicate detection, and PromQL query syntax validation linting.
-"""
-
-import os
-
-import tempfile
 import unittest
+import config_utils
 
-import validate_config  # pytype: disable=import-error
-
-
-class ValidateConfigTest(unittest.TestCase):
+class ConfigUtilsTest(unittest.TestCase):
 
   def test_lint_query_valid(self):
     query = (
         "sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count[5m]))"
         " by (gen_ai_agent_name)"
     )
-    self.assertEqual(validate_config.lint_query(query), [])
+    self.assertEqual(config_utils.lint_query(query), [])
 
   def test_lint_query_unbalanced_parentheses(self):
     query = (
         "sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count[5m]))"
         " by (gen_ai_agent_name"
     )
-    errors = validate_config.lint_query(query)
+    errors = config_utils.lint_query(query)
     self.assertTrue(any("Parentheses error" in e for e in errors))
 
   def test_lint_query_unbalanced_braces(self):
@@ -47,7 +37,7 @@ class ValidateConfigTest(unittest.TestCase):
         'sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count{error_type!=""[5m]))'
         " by (gen_ai_agent_name)"
     )
-    errors = validate_config.lint_query(query)
+    errors = config_utils.lint_query(query)
     self.assertTrue(any("Curly braces error" in e for e in errors))
 
   def test_lint_query_invalid_window(self):
@@ -56,7 +46,7 @@ class ValidateConfigTest(unittest.TestCase):
           "sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count"
           f"[{invalid_suffix}])) by (gen_ai_agent_name)"
       )
-      errors = validate_config.lint_query(query)
+      errors = config_utils.lint_query(query)
       self.assertTrue(
           any("Invalid Prometheus time window" in e for e in errors)
       )
@@ -77,7 +67,7 @@ class ValidateConfigTest(unittest.TestCase):
         ),
     ]
     for query in queries:
-      self.assertEqual(validate_config.lint_query(query), [])
+      self.assertEqual(config_utils.lint_query(query), [])
 
   def test_lint_query_invalid_subquery_intervals(self):
     queries = [
@@ -95,28 +85,32 @@ class ValidateConfigTest(unittest.TestCase):
         ),
     ]
     for query in queries:
-      errors = validate_config.lint_query(query)
+      errors = config_utils.lint_query(query)
       self.assertTrue(
           any("Invalid Prometheus time window" in e for e in errors)
       )
 
   def test_lint_query_missing_reference(self):
     query = "sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count[5m]))"
-    errors = validate_config.lint_query(query)
+    errors = config_utils.lint_query(query)
     self.assertTrue(
         any("missing agent identifier reference" in e for e in errors)
     )
 
   def test_lint_query_valid_with_filter(self):
-    query = 'sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count{gen_ai_agent_name="my-agent"}[5m]))'
-    self.assertEqual(validate_config.lint_query(query), [])
+    query = (
+        'sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count'
+        '{gen_ai_agent_name="my-agent"}[5m]))'
+    )
+    self.assertEqual(config_utils.lint_query(query), [])
 
   def test_lint_query_valid_with_regex_or_prefix_filter(self):
     query = (
-        'sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count{gen_ai_agent_name!~"dev-.*"}[5m]))'
+        'sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count'
+        '{gen_ai_agent_name!~"dev-.*"}[5m]))'
         " by (gen_ai_agent_name)"
     )
-    self.assertEqual(validate_config.lint_query(query), [])
+    self.assertEqual(config_utils.lint_query(query), [])
 
   def test_scanner_extract_valid_hcl(self):
     hcl_content = """
@@ -136,7 +130,7 @@ class ValidateConfigTest(unittest.TestCase):
           }
         }
         """
-    policies = validate_config.extract_alert_policies(hcl_content)
+    policies = config_utils.extract_alert_policies(hcl_content)
     self.assertEqual(len(policies), 1)
     self.assertEqual(policies[0]["resource_name"], "agent_latency_anomaly")
     self.assertEqual(policies[0]["signal_type"], "latency")
@@ -152,7 +146,7 @@ class ValidateConfigTest(unittest.TestCase):
           }
         }
         """
-    policies = validate_config.extract_alert_policies(hcl_content)
+    policies = config_utils.extract_alert_policies(hcl_content)
     self.assertEqual(len(policies), 1)
     self.assertEqual(len(policies[0]["queries"]), 1)
     self.assertEqual(
@@ -171,7 +165,7 @@ class ValidateConfigTest(unittest.TestCase):
           }
         }
         """
-    policies_three = validate_config.extract_alert_policies(
+    policies_three = config_utils.extract_alert_policies(
         hcl_content_three_backslash
     )
     self.assertEqual(len(policies_three), 1)
@@ -181,40 +175,6 @@ class ValidateConfigTest(unittest.TestCase):
         'sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count{gen_ai_agent_name="12345"}[5m]))',
     )
     self.assertEqual(policies_three[0]["engine_ids"], ["12345"])
-
-  def test_validator_detects_duplicates(self):
-    with tempfile.TemporaryDirectory() as tmpdir:
-      tf_content_1 = """
-            resource "google_monitoring_alert_policy" "agent_latency_anomaly_1" {
-              display_name = "[Agent Alert] Latency Anomaly - ${var.agent_name}"
-              conditions {
-                condition_prometheus_query_language {
-                  query = "sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count[5m])) by (gen_ai_agent_name)"
-                }
-              }
-            }
-            """
-      tf_content_2 = """
-            resource "google_monitoring_alert_policy" "agent_latency_anomaly_2" {
-              display_name = "[Agent Alert] Latency Anomaly - Alternative"
-              conditions {
-                condition_prometheus_query_language {
-                  query = "sum(rate(workload_googleapis_com:gen_ai_invoke_agent_duration_count[5m])) by (gen_ai_agent_name)"
-                }
-              }
-            }
-            """
-      with open(os.path.join(tmpdir, "policy1.tf"), "w") as f:
-        f.write(tf_content_1)
-      with open(os.path.join(tmpdir, "policy2.tf"), "w") as f:
-        f.write(tf_content_2)
-
-      results = validate_config.validate_directory_tf_files(
-          tmpdir, "${var.gen_ai_agent_name}"
-      )
-      self.assertFalse(results["valid"])
-      self.assertEqual(len(results["duplicates_found"]), 1)
-      self.assertEqual(results["duplicates_found"][0]["signal_type"], "latency")
 
   def test_scanner_extracts_quality_metric_signal_type(self):
     hcl_content = """
@@ -242,48 +202,12 @@ class ValidateConfigTest(unittest.TestCase):
           }
         }
         """
-    policies = validate_config.extract_alert_policies(hcl_content)
+    policies = config_utils.extract_alert_policies(hcl_content)
     self.assertEqual(len(policies), 1)
     self.assertEqual(
         policies[0]["resource_name"], "agent_final_response_quality"
     )
     self.assertEqual(policies[0]["signal_type"], "final_response_quality_v1")
-
-  def test_validator_detects_quality_duplicates(self):
-    with tempfile.TemporaryDirectory() as tmpdir:
-      tf_content_1 = """
-            resource "google_monitoring_alert_policy" "q1" {
-              display_name = "Quality Alert 1"
-              conditions {
-                condition_threshold {
-                  filter = "resource.type=\\"aiplatform.googleapis.com/OnlineEvaluator\\" AND metric.type=\\"aiplatform.googleapis.com/online_evaluator/scores\\" AND metric.labels.evaluation_metric_name=\\"tool_use_quality_v1\\""
-                }
-              }
-            }
-            """
-      tf_content_2 = """
-            resource "google_monitoring_alert_policy" "q2" {
-              display_name = "Quality Alert 2"
-              conditions {
-                condition_threshold {
-                  filter = "resource.type=\\"aiplatform.googleapis.com/OnlineEvaluator\\" AND metric.type=\\"aiplatform.googleapis.com/online_evaluator/scores\\" AND metric.labels.evaluation_metric_name=\\"tool_use_quality_v1\\""
-                }
-              }
-            }
-            """
-      with open(os.path.join(tmpdir, "policy1.tf"), "w") as f:
-        f.write(tf_content_1)
-      with open(os.path.join(tmpdir, "policy2.tf"), "w") as f:
-        f.write(tf_content_2)
-
-      results = validate_config.validate_directory_tf_files(
-          tmpdir, "${var.gen_ai_agent_name}"
-      )
-      self.assertFalse(results["valid"])
-      self.assertEqual(len(results["duplicates_found"]), 1)
-      self.assertEqual(
-          results["duplicates_found"][0]["signal_type"], "tool_use_quality_v1"
-      )
 
   def test_validate_policy_duration_quality(self):
     # Quality metrics alerts: MUST set duration="300s".
@@ -292,7 +216,7 @@ class ValidateConfigTest(unittest.TestCase):
         "queries": [],
         "duration": "300s",
     }
-    self.assertEqual(validate_config.validate_policy_duration(policy_ok), [])
+    self.assertEqual(config_utils.validate_policy_duration(policy_ok), [])
 
     policy_err = {
         "signal_type": "final_response_quality_v1",
@@ -300,7 +224,7 @@ class ValidateConfigTest(unittest.TestCase):
         "duration": "600s",
     }
     self.assertEqual(
-        validate_config.validate_policy_duration(policy_err),
+        config_utils.validate_policy_duration(policy_err),
         [
             "Duration Error: Quality alerts MUST set duration='300s'. Found"
             " duration='600s'."
@@ -315,7 +239,7 @@ class ValidateConfigTest(unittest.TestCase):
         "queries": [query],
         "duration": None,
     }
-    self.assertEqual(validate_config.validate_policy_duration(policy_ok), [])
+    self.assertEqual(config_utils.validate_policy_duration(policy_ok), [])
 
     policy_err = {
         "signal_type": "latency",
@@ -323,7 +247,7 @@ class ValidateConfigTest(unittest.TestCase):
         "duration": "300s",
     }
     self.assertEqual(
-        validate_config.validate_policy_duration(policy_err),
+        config_utils.validate_policy_duration(policy_err),
         [
             "Duration Error: Long-lookback alerts (>25h) must NOT set a"
             " duration. Found duration='300s' for lookback of 48h."
@@ -338,7 +262,7 @@ class ValidateConfigTest(unittest.TestCase):
         "queries": [query],
         "duration": "300s",
     }
-    self.assertEqual(validate_config.validate_policy_duration(policy_ok), [])
+    self.assertEqual(config_utils.validate_policy_duration(policy_ok), [])
 
     policy_err = {
         "signal_type": "latency",
@@ -346,7 +270,7 @@ class ValidateConfigTest(unittest.TestCase):
         "duration": None,
     }
     self.assertEqual(
-        validate_config.validate_policy_duration(policy_err),
+        config_utils.validate_policy_duration(policy_err),
         [
             "Duration Error: Short-lookback alerts (<=25h) MUST set"
             " duration='300s'. Found duration='None'."

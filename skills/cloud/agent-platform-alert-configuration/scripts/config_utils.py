@@ -13,34 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""HCL configuration and PromQL validation script for agent platform metrics.
+"""Shared utility functions for alert configuration validation."""
 
-Parses Terraform HCL alert policy resource blocks, detects duplicate targets
-for agents, and lints Prometheus queries for correct syntax, time
-windows, and essential label filters.
-"""
-
-import argparse
-import glob
-import json
-import os
 import re
-import sys
-
 
 def check_balanced_chars(
     query: str, open_char: str, close_char: str
 ) -> str | None:
-  """Checks if parenthesis or braces are balanced.
-
-  Args:
-      query: The PromQL or SQL query string to check.
-      open_char: The opening character (e.g., '(' or '{').
-      close_char: The closing character (e.g., ')' or '}').
-
-  Returns:
-      An error message string if unbalanced, otherwise None.
-  """
+  """Checks if parenthesis or braces are balanced."""
   count = 0
   for i, char in enumerate(query):
     if char == open_char:
@@ -55,14 +35,7 @@ def check_balanced_chars(
 
 
 def parse_promql_duration(duration_str: str) -> float | None:
-  """Converts PromQL duration string to hours.
-
-  Args:
-      duration_str: The PromQL duration string (e.g., '1h', '5m', '1d').
-
-  Returns:
-      The duration in hours as a float, or None if the format is invalid.
-  """
+  """Converts PromQL duration string to hours."""
   match = re.match(r"^(\d+)([smhdw])$", duration_str)
   if not match:
     return None
@@ -82,14 +55,7 @@ def parse_promql_duration(duration_str: str) -> float | None:
 
 
 def get_max_lookback_hours(query: str) -> float:
-  """Calculates the maximum lookback in hours from windows and offsets.
-
-  Args:
-      query: The PromQL query string.
-
-  Returns:
-      The maximum lookback window or offset found in the query, in hours.
-  """
+  """Calculates the maximum lookback in hours from windows and offsets."""
   max_hours = 0
 
   # Check windows and subqueries
@@ -113,15 +79,7 @@ def get_max_lookback_hours(query: str) -> float:
 
 
 def validate_policy_duration(policy: dict) -> list[str]:
-  """Validates duration based on lookback window.
-
-  Args:
-      policy: A dictionary representing the parsed alert policy, including
-        'queries', 'duration', and 'signal_type'.
-
-  Returns:
-      A list of error messages, if any validation errors are found.
-  """
+  """Validates duration based on lookback window."""
   errors = []
   max_lookback = 0
   for query in policy["queries"]:
@@ -158,14 +116,7 @@ def validate_policy_duration(policy: dict) -> list[str]:
 
 
 def lint_query(query: str) -> list[str]:
-  """Runs a suite of sanity lint checks on a PromQL query.
-
-  Args:
-      query: The PromQL query string to lint.
-
-  Returns:
-      A list of string lint error messages. Empty if valid.
-  """
+  """Runs a suite of sanity lint checks on a PromQL query."""
   errors = []
 
   # 1. Balanced parentheses
@@ -229,15 +180,7 @@ def lint_query(query: str) -> list[str]:
 
 
 def extract_alert_policies(hcl_content: str) -> list[dict]:
-  """Extracts resource 'google_monitoring_alert_policy' blocks and metadata.
-
-  Args:
-      hcl_content: The string content of a Terraform HCL file.
-
-  Returns:
-      A list of dictionaries, each representing a parsed alert policy with
-      keys like 'resource_name', 'queries', 'duration', etc.
-  """
+  """Extracts resource 'google_monitoring_alert_policy' blocks and metadata."""
   policies = []
   pattern = re.compile(
       r'resource\s+"google_monitoring_alert_policy"\s+"([^"]+)"\s*\{'
@@ -374,159 +317,3 @@ def extract_alert_policies(hcl_content: str) -> list[dict]:
     })
 
   return policies
-
-
-def validate_directory_tf_files(
-    directory: str, expected_engine_var: str | None = None
-) -> dict:
-  """Scans and validates all *.tf files in a given directory.
-
-  Args:
-      directory: The path to the directory containing Terraform files.
-      expected_engine_var: The expected variable reference for the agent
-        identifier (e.g., '${var.gen_ai_agent_name}').
-
-  Returns:
-      A dictionary summarizing validation results, including 'valid' (bool),
-      'errors' (list of str), and other metadata.
-  """
-  tf_files = glob.glob(os.path.join(directory, "*.tf"))
-  all_errors = []
-  all_policies = []
-  duplicates = []
-
-  target_map = {}
-
-  for filepath in tf_files:
-    filename = os.path.basename(filepath)
-    try:
-      with open(filepath, "r") as f:
-        content = f.read()
-    except Exception as e:
-      all_errors.append(f"File error in '{filename}': {e}")
-      continue
-
-    policies = extract_alert_policies(content)
-    for policy in policies:
-      policy["filename"] = filename
-      all_policies.append(policy)
-
-      if not policy.get("is_sql"):
-        for query in policy["queries"]:
-          lint_errs = lint_query(query)
-          for err in lint_errs:
-            all_errors.append(
-                f"Lint error in '{filename}' -> resource"
-                f" '{policy['resource_name']}': {err}"
-            )
-
-        duration_errs = validate_policy_duration(policy)
-        for err in duration_errs:
-          all_errors.append(
-              f"Duration error in '{filename}' -> resource"
-              f" '{policy['resource_name']}': {err}"
-          )
-
-      engine_key = (
-          policy["engine_ids"][0]
-          if policy["engine_ids"]
-          else expected_engine_var or "default"
-      )
-      key = (engine_key, policy["signal_type"])
-
-      if key not in target_map:
-        target_map[key] = []
-      target_map[key].append(policy)
-
-  for (engine, signal_type), matches in target_map.items():
-    if len(matches) > 1 and signal_type != "unknown":
-      duplicates.append({
-          "engine_id": engine,
-          "signal_type": signal_type,
-          "policies": [
-              {
-                  "filename": p["filename"],
-                  "resource_name": p["resource_name"],
-                  "display_name": p["display_name"],
-              }
-              for p in matches
-          ],
-      })
-
-  for dup in duplicates:
-    policy_list = ", ".join(
-        f"'{p['resource_name']}' in '{p['filename']}'" for p in dup["policies"]
-    )
-    all_errors.append(
-        "Duplicate Target Error: Multiple alert policies are targeting the"
-        f" same engine '{dup['engine_id']}' and signal '{dup['signal_type']}':"
-        f" [{policy_list}]. Please apply the in-place upgrade protocol instead"
-        " of appending new blocks!"
-    )
-
-  return {
-      "valid": len(all_errors) == 0,
-      "errors": all_errors,
-      "policies_scanned_count": len(all_policies),
-      "duplicates_found": duplicates,
-  }
-
-
-def main():
-  parser = argparse.ArgumentParser(
-      description=(
-          "Lints HCL alerts and PromQL query targets in standard tf templates."
-      )
-  )
-  parser.add_argument(
-      "--scan-duplicates",
-      dest="directory",
-      type=str,
-      default=".",
-      help="Directory containing *.tf files to scan.",
-  )
-  parser.add_argument(
-      "--engine-var",
-      type=str,
-      default="${var.gen_ai_agent_name}",
-      help="The expected variable or literal for the agent identifier.",
-  )
-  parser.add_argument(
-      "--lint-syntax",
-      dest="file",
-      type=str,
-      help="Validate a single specific HCL file instead of scanning directory.",
-  )
-  args = parser.parse_args()
-
-  if args.file:
-    try:
-      with open(args.file, "r") as f:
-        content = f.read()
-      policies = extract_alert_policies(content)
-      errors = []
-      for p in policies:
-        if not p.get("is_sql"):
-          for q in p["queries"]:
-            errors.extend(lint_query(q))
-          errors.extend(validate_policy_duration(p))
-      if errors:
-        print(f"Validation failed for '{args.file}':", file=sys.stderr)
-        for err in errors:
-          print(f"  - {err}", file=sys.stderr)
-        sys.exit(1)
-      else:
-        print(f"Validation passed for '{args.file}'!")
-        sys.exit(0)
-    except Exception as e:
-      print(f"Error reading file '{args.file}': {e}", file=sys.stderr)
-      sys.exit(1)
-
-  results = validate_directory_tf_files(args.directory, args.engine_var)
-  print(json.dumps(results, indent=2))
-  if not results["valid"]:
-    sys.exit(1)
-
-
-if __name__ == "__main__":
-  main()

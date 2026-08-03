@@ -91,7 +91,7 @@ pip install -r scripts/requirements.txt
         *   **Action**: Scan the target directory to see if aggregated policies
             already exist targeting the same metrics (grouped by
             `reasoning_engine_id` or `gen_ai_agent_name`). Use
-            `validate_config.py --scan-duplicates` to verify.
+            `scan_duplicates.py` to verify.
 2.  **Alert Policy Type Resource Files**: You MUST list and read files under
     `references/` with names ending in `_alert_policies.md` to learn how to
     configure alert policies based on type. By default you should configure all
@@ -203,16 +203,16 @@ resolve duplicates, and validate configs:
         --agent-name {agent_name}`
 2.  **Duplicate Check & Merge**: Checks for pre-existing alerts in the target
     folder to ensure changes are merged in-place rather than appended:
-    *   Command: `python3 scripts/validate_config.py --scan-duplicates {target_tf_dir}
+    *   Command: `python3 scripts/scan_duplicates.py {target_tf_dir}
         --engine-var '${var.gen_ai_agent_name}'`
 3.  **Config Linting**: Validates PromQL grammar, matching engine labels, and
     HCL structure:
-    *   Command: `python3 scripts/validate_config.py --lint-syntax {path_to_tf_file}`
+    *   Command: `python3 scripts/lint_syntax.py {path_to_tf_file}`
     *   **Self-Correction Loop**: If validation fails (exits non-zero or outputs
         errors), you MUST read the command output, locate the line/file
         containing the lint error, analyze the PromQL syntax or Terraform HCL
-        issue, apply adjustments in-place, and re-run the `validate_config.py
-        --lint-syntax` validation. Repeat this loop until the validation script passes
+        issue, apply adjustments in-place, and re-run the `lint_syntax.py`
+        validation. Repeat this loop until the validation script passes
         successfully.
 
 ## Gotchas & Behavioral Corrections
@@ -227,7 +227,7 @@ resolve duplicates, and validate configs:
     to a negative value (e.g. > -3) to trigger/verify the "Firing" state before
     reverting. Always get confirmation before taking this action proactively.
 *   **Expected Script Failures**:
-    *   `validate_config.py --scan-duplicates` exiting with code 1: Parse the JSON
+    *   `scan_duplicates.py` exiting with code 1: Parse the JSON
         output for duplicate resource targets. Perform in-place upgrade edits,
         then re-check until it passes with 0.
     *   **Script Execution Failures & Self-Correction**: If the execution of
