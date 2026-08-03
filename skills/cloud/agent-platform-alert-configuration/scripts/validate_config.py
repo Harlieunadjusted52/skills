@@ -479,7 +479,8 @@ def main():
       )
   )
   parser.add_argument(
-      "--directory",
+      "--scan-duplicates",
+      dest="directory",
       type=str,
       default=".",
       help="Directory containing *.tf files to scan.",
@@ -491,7 +492,8 @@ def main():
       help="The expected variable or literal for the agent identifier.",
   )
   parser.add_argument(
-      "--file",
+      "--lint-syntax",
+      dest="file",
       type=str,
       help="Validate a single specific HCL file instead of scanning directory.",
   )
