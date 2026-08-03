@@ -8,9 +8,6 @@ description: >-
   BigQuery, Cloud Run, Cloud SQL, Pub/Sub, Cloud Storage, etc.). Use when asked
   to find, list, search, or discover GCP metric types, names, kind/value
   schemas, or descriptors.
-allowed-tools:
-  - list_metric_descriptors
-  - search_web
 ---
 
 # Metric Selection (Service Query & Local Keyword Filtering)
