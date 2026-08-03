@@ -74,10 +74,13 @@ pip install -r scripts/requirements.txt
         most of the manual checks listed in subsequent steps.
         *   Command: `python3 scripts/gather_agent_info.py --project-id
             {project_id} --agent-name {agent_name}`
-        *   **Note**: If this script fails, returns partial data, or doesn't
-            produce everything you need, you MUST satisfy requirements by
-            running the manual fallback steps listed in Step 2 and Step 3.
-    2.  **Step 2: Metric Scope Check**: Determine where to deploy policies.
+        *   **Note**: If this script **fails**, returns **partial data**, or
+            doesn't produce everything you need, you MUST satisfy requirements
+            by running the manual fallback steps listed in Step 2 and then
+            perform Step 3 below. If Step 1 succeeds and provides all info,
+            **SKIP** to Step 3 (Pre-existing Policies Check).
+    2.  **Step 2: Metric Scope Check (Fallback)**: Run this ONLY if Step 1
+        failed to determine the metric scope.
         *   **Action A (CLI)**: Run `gcloud beta monitoring metrics-scopes list
             projects/{project_id}`. If a scoping project is returned, you MUST
             deploy policies there.
