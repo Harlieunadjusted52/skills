@@ -141,6 +141,7 @@ repo to install.
 -   [**Advanced Google Cloud Storage Skills**](https://github.com/gemini-cli-extensions/google-cloud-storage)
 -   [**Agent Development Kit (ADK) Skills**](https://github.com/google/agents-cli)
 -   [**Firestore Skills**](https://github.com/firebase/agent-skills/tree/main/skills/firebase-firestore)
+-   [**Genkit Skills**](https://github.com/genkit-ai/skills)
 
 ## Plugins
 
