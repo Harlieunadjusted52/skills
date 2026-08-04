@@ -34,12 +34,10 @@ Dashboards API, gcloud CLI, or declarative dashboard provisioning pipelines.
 >   repository structures.
 > - **SCRIPT EXECUTION**: Execute the bundled Python scripts directly using
 >   python3, for example: `python3 scripts/assemble_widget_proto.py ...`.
-> - **OUTPUT FILE CONTRACT**: Pass `--output "chart.textproto"` to
->   `assemble_widget_proto` to create the file `./chart.textproto` directly in
->   your active workspace root. If generating multiple charts in a workflow,
->   pass `--output auto` to let the script programmatically assign deterministic
->   sequential filenames (`chart.textproto`, `chart_2.textproto`, etc.) and
->   prevent overwrites.
+> - **OUTPUT GENERATION**: The `assemble_widget_proto` script automatically
+>   generates deterministic sequential filenames like `chart.textproto` and `chart_2.textproto`
+>   and saves them to the active workspace. The script will handle naming and saving
+>   automatically, and will print the generated filename to the console.
 
 ## Prerequisites: Environment Setup
 
@@ -115,44 +113,20 @@ Example `SemanticPlotSpec`:
 
 ### Stage 3: Protobuf Assembly & Output
 
-Run Stage 3 using python3, selecting the output flag based on your workflow:
+Run Stage 3 using python3 to generate and save the widget textproto:
 
-#### Example A: Single-Chart Task (Default)
-For standard tasks or automated evaluations generating a single chart, pass
-`--output "chart.textproto"`:
 ```bash
 python3 scripts/assemble_widget_proto.py \
   --promql_query "PROMQL_QUERY" \
-  --spec_json 'SEMANTIC_PLOT_SPEC_JSON' \
-  --output "chart.textproto"
-```
-
-#### Example B: Multi-Chart Workflow (Automatic Sequential Naming)
-When generating multiple charts in a single workflow (such as creating a
-4-chart dashboard), pass `--output auto` so the script programmatically assigns
-deterministic sequential filenames (`chart.textproto`, `chart_2.textproto`,
-`chart_3.textproto`) and prevents overwrites:
-```bash
-python3 scripts/assemble_widget_proto.py \
-  --promql_query "PROMQL_QUERY" \
-  --spec_json 'SEMANTIC_PLOT_SPEC_JSON' \
-  --output auto
+  --spec_json 'SEMANTIC_PLOT_SPEC_JSON'
 ```
 
 > [!IMPORTANT]
 > **MANDATORY FILE OUTPUT CONTRACT**:
-> Always save output files directly in your workspace root without
-> subdirectories or absolute paths.
+> The script automatically names and saves output files like `chart.textproto` and `chart_2.textproto` directly in your workspace root without subdirectories.
 
-- **Output File**: Saves `./chart.textproto` (or sequential filenames like
-  `./chart_2.textproto`) directly in the active workspace root.
-- **Assigned Filename Feedback**: Whenever an output file is saved, the script
-  logs the file path to stderr, for example:
-  `Wrote widget textproto to: .../chart_2.textproto`. Check your command
-  execution logs for the exact filename created so you can target it in Stage 4
-  validation.
-- **Text Chat Output**: Enclose the generated SDUI widget textproto inside a
-  ```` ```textproto ```` code block in your response:
+- **Assigned Filename Feedback**: Whenever an output file is saved, the script logs the file path to stderr, for example: `Wrote widget textproto to: .../chart.textproto`. Read your command execution logs for the exact filename created so you can target it in Stage 4 validation.
+- **Text Chat Output**: Enclose the generated SDUI widget textproto inside a ```` ```textproto ```` code block in your response:
 
 ```textproto
 title: "..."
@@ -167,19 +141,16 @@ xy_chart {
 > **DO NOT FINISH YOUR TURN UNTIL FILE VERIFICATION PASSES**:
 > 1. **Run Validation Check**: Execute the validator script against the
 >    generated file, such as `chart.textproto` or the sequential filename like
->    `chart_2.textproto` output from Stage 3 when using `--output auto`:
+>    `chart_2.textproto` output from Stage 3:
 >    ```bash
 >    python3 scripts/validate_chart.py --input_file "GENERATED_FILE.textproto"
 >    ```
 > 2. **Auto-Retry if Missing or Failed**: If `validate_chart` reports that the
->    file is missing or invalid, immediately re-run Stage 3 targeting that exact
->    filename. Do NOT pass `auto` when retrying; pass the specific filename like
->    `--output "chart_2.textproto"` so it overwrites the broken file:
+>    file is missing or invalid, verify your script parameters and immediately re-run Stage 3:
 >    ```bash
 >    python3 scripts/assemble_widget_proto.py \
 >      --promql_query "PROMQL_QUERY" \
->      --spec_json 'SEMANTIC_PLOT_SPEC_JSON' \
->      --output "GENERATED_FILE.textproto"
+>      --spec_json 'SEMANTIC_PLOT_SPEC_JSON'
 >    ```
 > 3. **Validation & Retries**: Run `validate_chart` to verify the generated
 >    textproto. If validation fails due to a schema or syntax error, correct

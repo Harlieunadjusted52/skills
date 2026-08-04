@@ -67,19 +67,23 @@ def assemble_widget_textproto(
   return "\n".join(lines)
 
 
-def resolve_output_path(output_arg: str, work_dir: str) -> str:
-  """Resolves the output path, handling 'auto' for deterministic sequential filenames."""
-  if output_arg.lower() == "auto":
-    idx = 1
-    while True:
-      filename = "chart.textproto" if idx == 1 else f"chart_{idx}.textproto"
-      candidate = os.path.join(work_dir, filename)
-      if not os.path.exists(candidate):
-        return candidate
-      idx += 1
-  if not os.path.isabs(output_arg):
-    return os.path.join(work_dir, output_arg)
-  return output_arg
+def get_auto_output_path(work_dir: str) -> str:
+  """Automatically assigns deterministic sequential filenames (chart.textproto, chart_2.textproto)."""
+  # Adjust for Google3 environments where the agent may run from the CitC client root
+  # rather than the google3/ directory. This check is safely bypassed in public (GitHub)
+  # environments because the google3/ directory will not exist. Internally, the workspace
+  # contains a parent CitC directory (causing flakiness if the agent runs from there). Externally,
+  # the Git checkout is the true root, so agents won't accidentally run from a parent wrapper.
+  if not work_dir.endswith("google3") and os.path.basename(work_dir) != "google3":
+    if os.path.exists(os.path.join(work_dir, "google3")):
+      work_dir = os.path.join(work_dir, "google3")
+  idx = 1
+  while True:
+    filename = "chart.textproto" if idx == 1 else f"chart_{idx}.textproto"
+    candidate = os.path.join(work_dir, filename)
+    if not os.path.exists(candidate):
+      return candidate
+    idx += 1
 
 
 def main() -> None:
@@ -114,15 +118,6 @@ def main() -> None:
       default="",
       help="JSON string of SemanticPlotSpec from Stage 2.",
   )
-  parser.add_argument(
-      "--output",
-      "-o",
-      default="chart.textproto",
-      help=(
-          "Output file path to write textproto (default: chart.textproto; use"
-          " 'auto' for deterministic sequential naming)."
-      ),
-  )
 
   args = parser.parse_args()
 
@@ -155,13 +150,12 @@ def main() -> None:
   )
 
   print(proto_text)
-  if args.output and args.output != "-":
-    work_dir = os.environ.get("BUILD_WORKING_DIRECTORY", os.getcwd())
-    output_path = resolve_output_path(args.output, work_dir)
+  work_dir = os.environ.get("BUILD_WORKING_DIRECTORY", os.getcwd())
+  output_path = get_auto_output_path(work_dir)
 
-    with open(output_path, "w", encoding="utf-8") as f:
-      f.write(proto_text)
-    print(f"Wrote widget textproto to: {output_path}", file=sys.stderr)
+  with open(output_path, "w", encoding="utf-8") as f:
+    f.write(proto_text)
+  print(f"Wrote widget textproto to: {output_path}", file=sys.stderr)
 
 
 if __name__ == "__main__":
