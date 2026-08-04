@@ -85,6 +85,7 @@ repo to install.
   - [**Data Lineage Summary**](./skills/cloud/datalineage-summary)
   - [**Spanner Basics**](./skills/cloud/spanner-basics)
 - **Developer tools**
+  - [**Developer Device Platform**](./skills/cloud/developer-device-platform-basics)
   - [**gcloud CLI Skill for AI Agents**](./skills/cloud/gcloud)
   - [**Google Agents CLI Onboarding**](./skills/cloud/google-agents-cli-onboarding)
 - **Management tools**
