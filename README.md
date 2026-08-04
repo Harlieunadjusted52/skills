@@ -99,6 +99,7 @@ repo to install.
   - [**GKE TPU Metrics Monitoring Guide**](./skills/cloud/gke-tpu-metrics-monitoring)
   - [**Handle Disruption on GPUs and TPUs Troubleshooting**](./skills/cloud/gke-ai-troubleshooting-handle-disruption-gpu-tpu)
   - [**Metric Selection (Service Query & Local Keyword Filtering)**](./skills/cloud/cloud-monitoring-metric-selection)
+  - [**TPU Connection Failure and VBAR OOM Troubleshooting**](./skills/cloud/gke-ai-troubleshooting-tpu-vbar-oom)
   - [**Workload Manager Basics**](./skills/cloud/workload-manager-basics)
 - **Well-Architected Framework**
   - [**Google Cloud Well-Architected Framework skill for the Cost Optimization pillar**](./skills/cloud/google-cloud-waf-cost-optimization)
