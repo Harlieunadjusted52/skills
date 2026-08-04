@@ -18,7 +18,12 @@ license: Apache-2.0
 metadata:
     version: v1
     publisher: google
-    tags: [gcs, storage, cloud-storage, buckets, objects]
+    tags:
+      - gcs
+      - storage
+      - cloud-storage
+      - buckets
+      - objects
     category: Storage
     support_tier: primary
 ---
