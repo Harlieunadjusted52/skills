@@ -71,6 +71,7 @@ repo to install.
   - [**GKE Reliability**](./skills/cloud/gke-reliability)
   - [**GKE Service Networking Skill**](./skills/cloud/gke-service-networking)
   - [**GKE Storage**](./skills/cloud/gke-storage)
+  - [**GKE TPU Dynamic Slices Monitoring & Management**](./skills/cloud/gke-tpu-dynamic-slices-monitoring)
   - [**GKE Upgrades & Maintenance**](./skills/cloud/gke-upgrades)
   - [**GKE Workload Scaling**](./skills/cloud/gke-workload-scaling)
   - [**GKE Workload Troubleshooting Skill**](./skills/cloud/gke-workload-troubleshooting)
